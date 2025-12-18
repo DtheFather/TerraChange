@@ -99,7 +99,8 @@ A visual overview of the architecture is available inside the app under **Model 
 
 ## 👤 Author
 
-**DtheFather**  
+**[Ankit Halder](https://github.com/DtheFather)**
+
 B.Tech CSE | AI, ML & Cybersecurity Enthusiast  
 
 ---

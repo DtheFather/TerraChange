@@ -19,6 +19,7 @@ st.set_page_config(
 )
 
 
+
 # =====================================================
 # SIDEBAR
 # =====================================================
@@ -37,7 +38,7 @@ st.sidebar.caption("Self-Supervised Satellite Change Detection")
 
 
 # =====================================================
-# GLOBAL THEME (STABLE LIGHT / DARK)
+# GLOBAL THEME (UNCHANGED)
 # =====================================================
 if light_mode:
     st.markdown("""
@@ -146,9 +147,17 @@ def show_metric_cards(iou, precision, recall, f1):
 
 
 # =====================================================
-# LOAD MODEL
+# LOAD MODEL (CACHED)
 # =====================================================
-model = load_change_model()
+@st.cache_resource
+def get_model():
+    model, downloaded = load_change_model()
+    return model, downloaded
+
+
+model, downloaded = get_model()
+
+
 
 st.title("TerraChange")
 st.caption("Self-Supervised Satellite Image Change Detection")
@@ -199,9 +208,13 @@ if page == "Upload & Predict":
         c1.metric("Mean Change Confidence", f"{mean_conf:.3f}")
         c2.metric("High-Confidence Pixels (%)", f"{high_conf*100:.2f}%")
 
+        # ✅ EXPLANATION (THIS WAS MISSING BEFORE)
         st.caption(
-            "Low mean confidence is expected because most pixels remain unchanged. "
-            "High-confidence pixels highlight localized structural changes."
+            "ℹ️ **Why are these values low?**\n\n"
+            "- Satellite change detection is **highly imbalanced**: most pixels remain unchanged.\n"
+            "- The model assigns low probabilities to unchanged regions, lowering the **mean confidence**.\n"
+            "- Only a small fraction of pixels correspond to real changes, so **high-confidence pixels** are sparse.\n"
+            "- This behavior is expected and indicates **conservative, localized change detection** rather than overprediction."
         )
 
         # ---------------- HEATMAP ----------------
@@ -212,6 +225,7 @@ if page == "Upload & Predict":
         ax.axis("off")
         st.pyplot(fig, use_container_width=False)
 
+        # ✅ LEGEND (ALWAYS VISIBLE)
         st.markdown("""
         **Confidence Legend**
         - **0.0 – 0.3** → No change  
@@ -263,28 +277,44 @@ elif page == "Qualitative Examples":
 
 
 # =====================================================
-# PAGE 3 — MODEL ARCHITECTURE
+# PAGE 3 — MODEL ARCHITECTURE (UNCHANGED FROM SAFE VERSION)
 # =====================================================
 else:
 
     st.header("Model Architecture")
 
     st.markdown("""
-    TerraChange uses a Siamese ResNet50 encoder and a U-Net decoder.
-    Feature differences between two timestamps are decoded into a
-    pixel-level change probability map.
+    TerraChange is built around a **self-supervised Siamese change detection framework**
+    for multi-temporal satellite imagery. The architecture combines
+    **SimCLR-based contrastive learning**, a **ResNet-50 encoder**, and
+    a **U-Net style decoder** to generate pixel-level change maps.
     """)
 
     st.image(
         "assets/model_flow.png",
-        caption="Siamese Change Detection Pipeline",
-        width=600
+        caption="TerraChange: Siamese Change Detection Pipeline",
+        width=650
     )
 
+    st.markdown("### Architecture Breakdown")
+
     st.markdown("""
-    **Why TerraChange works**
-    - Shared encoder ensures consistent comparison  
-    - Feature differencing suppresses unchanged regions  
-    - U-Net decoder preserves spatial detail  
-    - Self-supervised pretraining improves robustness  
+    **1. Shared Siamese Encoder (ResNet-50)**  
+    **2. Self-Supervised Pretraining (SimCLR)**  
+    **3. Feature Differencing**  
+    **4. U-Net Decoder**
     """)
+
+    st.markdown("### Why This Design Works")
+
+    st.markdown("""
+    - Reduces dependency on large labeled datasets  
+    - Stable temporal comparison through weight sharing  
+    - Preserves fine-grained spatial details  
+    - Robust to illumination and seasonal variations  
+    """)
+
+    st.caption(
+        "Applications include urban growth monitoring, disaster impact assessment, "
+        "and environmental change analysis."
+    )

@@ -4,7 +4,9 @@ import torch
 import torchvision.transforms as T
 import numpy as np
 from PIL import Image
-from src.models import ResNetEncoder, ChangeDetectionModel, SiameseUNetChangeModel
+import urllib.request
+
+from src.models import ResNetEncoder, SiameseUNetChangeModel
 
 
 device = torch.device("cpu")
@@ -14,25 +16,44 @@ transform = T.Compose([
     T.ToTensor()
 ])
 
+
+def download_if_missing(path, url):
+    if not os.path.exists(path):
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        urllib.request.urlretrieve(url, path)
+        return True
+    return False
+
+
 def load_change_model():
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    ckpt_path = os.path.join(base_dir, "outputs", "change_model.pth")
+    outputs_dir = os.path.join(base_dir, "outputs")
 
-    encoder = ResNetEncoder(
-        backbone="resnet50",
-        pretrained=False
-    )
+    encoder_path = os.path.join(outputs_dir, "encoder_ssl_r50.pth")
+    change_path = os.path.join(outputs_dir, "change_model.pth")
+
+    ENCODER_URL = "https://huggingface.co/DtheFather/terrachange-models/resolve/main/encoder_ssl_r50.pth"
+    CHANGE_URL = "https://huggingface.co/DtheFather/terrachange-models/resolve/main/change_model.pth"
+
+    downloaded_encoder = download_if_missing(encoder_path, ENCODER_URL)
+    downloaded_change = download_if_missing(change_path, CHANGE_URL)
+
+    encoder = ResNetEncoder(backbone="resnet50", pretrained=False)
+    encoder.load_state_dict(torch.load(encoder_path, map_location=device))
 
     model = SiameseUNetChangeModel(encoder).to(device)
-
-    state_dict = torch.load(ckpt_path, map_location=device)
-    model.load_state_dict(state_dict, strict=True)
+    model.load_state_dict(torch.load(change_path, map_location=device))
 
     model.eval()
-    return model
+
+    # 🔥 return model + whether any download happened
+    return model, (downloaded_encoder or downloaded_change)
+
+
 
 def preprocess(img):
     return transform(img).unsqueeze(0).to(device)
+
 
 def predict(model, img1, img2, threshold=0.5):
     with torch.no_grad():
@@ -41,8 +62,6 @@ def predict(model, img1, img2, threshold=0.5):
         pred = (prob > threshold).float()
     return prob.squeeze().cpu().numpy(), pred.squeeze().cpu().numpy()
 
-import numpy as np
-import cv2
 
 def compute_metrics(pred, gt, eps=1e-6):
     if pred.shape != gt.shape:

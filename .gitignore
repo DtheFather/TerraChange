@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# FULL DATASET (DO NOT TRACK)
+data/
+data/**
+
+# Training artifacts (NOT NEEDED FOR DEPLOYMENT)
+outputs/encoder_ssl_*.pth
+outputs/ssl_*.png
+
+# Temp
+temp/
+
+# OS junk
+.DS_Store
+Thumbs.db
+*.log
+
+
+outputs/*.pth
+
+
+# Notebook outputs
+notebooks/BASELINE_outputs/
+output.png

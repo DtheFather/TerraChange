@@ -194,9 +194,9 @@ if page == "Upload & Predict":
 
         st.subheader("Prediction Result")
         c1, c2, c3 = st.columns(3)
-        c1.image(img1, caption="T1 Image", use_container_width=True)
-        c2.image(img2, caption="T2 Image", use_container_width=True)
-        c3.image(pred_vis, caption="Prediction Mask", use_container_width=True)
+        c1.image(img1, caption="T1 Image", use_column_width=True)
+        c2.image(img2, caption="T2 Image", use_column_width=True)
+        c3.image(pred_vis, caption="Prediction Mask", use_column_width=True)
 
         # ---------------- CONFIDENCE ----------------
         st.subheader("Prediction Confidence")

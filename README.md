@@ -5,11 +5,17 @@
 The system leverages **SimCLR-based contrastive learning** with a **ResNet-50 backbone**, followed by a **Siamese U-Net decoder** for pixel-level binary change prediction. The application is deployed using **Streamlit Cloud** and supports interactive inference through a web interface.
 
 ---
+![PyTorch](https://img.shields.io/badge/PyTorch-Deep%20Learning-orange?logo=pytorch)
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)
+![Self-Supervised Learning](https://img.shields.io/badge/Self--Supervised-SimCLR-green)
+![Backbone](https://img.shields.io/badge/Backbone-ResNet50-lightgrey)
 
+---
 ## 🚀 Live Demo (Streamlit App)
 
 👉 **Streamlit App:**  
-https://terrachange.streamlit.app  
+[![Streamlit](https://img.shields.io/badge/Streamlit-Live%20App-red?logo=streamlit)](https://terrachange.streamlit.app)
+
 
 > ⚠️ Note: The first launch may take 1–2 minutes while pretrained model weights are downloaded. This happens only once.
 
